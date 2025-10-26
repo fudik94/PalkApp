@@ -1,0 +1,97 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:id="@+id/main"
+        android:orientation="vertical"
+        android:padding="16dp"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
+
+        <!-- Отступ сверху, чтобы кнопки ниже -->
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="24dp"/>
+
+        <!-- Кнопки выбора языка -->
+        <LinearLayout
+            style="?android:attr/buttonBarStyle"
+            android:orientation="horizontal"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center"
+            android:paddingBottom="16dp"
+            android:layout_marginTop="16dp">
+
+            <Button
+                android:id="@+id/langRu"
+                style="?android:attr/buttonBarButtonStyle"
+                android:text="RU"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                tools:ignore="HardcodedText" />
+
+            <Button
+                android:id="@+id/langEn"
+                style="?android:attr/buttonBarButtonStyle"
+                android:text="EN"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="8dp"
+                tools:ignore="HardcodedText" />
+
+            <Button
+                android:id="@+id/langEt"
+                style="?android:attr/buttonBarButtonStyle"
+                android:text="ET"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                tools:ignore="HardcodedText" />
+        </LinearLayout>
+
+        <!-- Поле для ввода зарплаты -->
+        <EditText
+            android:id="@+id/salaryInput"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:hint="Sisesta brutopalk (€)"
+            android:inputType="numberDecimal"
+            android:minHeight="48dp"
+            android:paddingBottom="8dp"
+            tools:ignore="Autofill,HardcodedText,VisualLintTextFieldSize" />
+
+        <!-- Кнопка рассчитать -->
+        <Button
+            android:id="@+id/calcButton"
+            android:text="Arvuta"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:paddingBottom="16dp"
+            tools:ignore="HardcodedText" />
+
+        <!-- Поле для отображения результата -->
+        <TextView
+            android:id="@+id/resultText"
+            android:text=""
+            android:textSize="16sp"
+            android:gravity="center"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:paddingBottom="16dp"/>
+
+        <!-- Футер с email -->
+        <TextView
+            android:id="@+id/footerText"
+            android:text="© 2025 PalkApp. Kõik õigused kaitstud.\nKüsimused või tagasiside: palkapp.info@gmail.com"
+            android:textSize="12sp"
+            android:gravity="center"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            tools:ignore="HardcodedText" />
+    </LinearLayout>
+</ScrollView>
