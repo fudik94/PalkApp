@@ -8,9 +8,9 @@ It supports multiple languages and shows a clear **visual breakdown of taxes** a
 ## 🌍 Features
 
 - 🌐 Multi-language interface:
-  - 🇷🇺 **Russian**
-  - 🇬🇧 **English**
-  - 🇪🇪 **Estonian**
+  - ru **Russian**
+  - en **English**
+  - ee **Estonian**
 - 💰 Calculates:
   - **Net salary (after taxes)**
   - **Income tax**
