@@ -1,20 +1,32 @@
-//btw its my first amateur project thats why dont judge!bir sozle qinamayin!
 package com.example.palkapp;
 
+import android.graphics.Color;
 import android.os.Bundle;
-import android.widget.Button;
-import android.widget.EditText;
+import android.view.View;
+import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.EditText;
 import androidx.appcompat.app.AppCompatActivity;
 import java.util.HashMap;
 
 public class MainActivity extends AppCompatActivity {
 
     private EditText salaryInput;
-    private Button calcButton, langRu, langEn, langEt;
-    private TextView resultText, footerText;
+    private TextView calcButton;
+    private TextView langRu, langEn, langEt;
+    private TextView tvInputLabel, tvInputUnit, tvResultLabel, tvEmployerLabel, footerText;
+    private TextView tvNet, tvTotalEmployer;
+    private TextView tvLegendNet, tvLegendSocial, tvLegendTax, tvLegendContrib;
+    private TextView tvLegendNetLabel, tvLegendSocialLabel, tvLegendTaxLabel, tvLegendContribLabel;
+    private LinearLayout cardResults;
 
-    private String currentLang = "et"; // Эстонский язык по умолчанию
+    private View[] rowViews = new View[6];
+    private int[] rowDotColors;
+    private TextView[] rowAmounts = new TextView[6];
+    private TextView[] rowPcts    = new TextView[6];
+    private View[]     rowBars    = new View[6];
+
+    private String currentLang = "et";
     private HashMap<String, HashMap<String, String>> translations = new HashMap<>();
 
     @Override
@@ -22,76 +34,129 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        salaryInput = findViewById(R.id.salaryInput);
-        calcButton = findViewById(R.id.calcButton);
-        langRu = findViewById(R.id.langRu);
-        langEn = findViewById(R.id.langEn);
-        langEt = findViewById(R.id.langEt);
-        resultText = findViewById(R.id.resultText);
-        footerText = findViewById(R.id.footerText);
-
+        bindViews();
         initTranslations();
         changeLanguage(currentLang);
 
-        // Переключение языка
         langRu.setOnClickListener(v -> changeLanguage("ru"));
         langEn.setOnClickListener(v -> changeLanguage("en"));
         langEt.setOnClickListener(v -> changeLanguage("et"));
+        calcButton.setOnClickListener(v -> calculateAndDisplay());
+    }
 
-        // Кнопка расчета
-        calcButton.setOnClickListener(v -> calculateSalary());
+    private void bindViews() {
+        salaryInput     = findViewById(R.id.salaryInput);
+        calcButton      = findViewById(R.id.calcButton);
+        langRu          = findViewById(R.id.langRu);
+        langEn          = findViewById(R.id.langEn);
+        langEt          = findViewById(R.id.langEt);
+        tvInputLabel    = findViewById(R.id.tvInputLabel);
+        tvInputUnit     = findViewById(R.id.tvInputUnit);
+        tvResultLabel   = findViewById(R.id.tvResultLabel);
+        tvEmployerLabel = findViewById(R.id.tvEmployerLabel);
+        footerText      = findViewById(R.id.footerText);
+        tvNet           = findViewById(R.id.tvNet);
+        tvTotalEmployer = findViewById(R.id.tvTotalEmployer);
+        tvLegendNet         = findViewById(R.id.tvLegendNet);
+        tvLegendSocial      = findViewById(R.id.tvLegendSocial);
+        tvLegendTax         = findViewById(R.id.tvLegendTax);
+        tvLegendContrib     = findViewById(R.id.tvLegendContrib);
+        tvLegendNetLabel    = findViewById(R.id.tvLegendNetLabel);
+        tvLegendSocialLabel = findViewById(R.id.tvLegendSocialLabel);
+        tvLegendTaxLabel    = findViewById(R.id.tvLegendTaxLabel);
+        tvLegendContribLabel= findViewById(R.id.tvLegendContribLabel);
+        cardResults     = findViewById(R.id.cardResults);
+
+        rowDotColors = new int[]{
+            Color.parseColor("#6366F1"),
+            Color.parseColor("#8B5CF6"),
+            Color.parseColor("#F59E0B"),
+            Color.parseColor("#3B82F6"),
+            Color.parseColor("#EF4444"),
+            Color.parseColor("#00FF87")
+        };
+
+        int[] rowIds = {
+            R.id.rowSocialTax, R.id.rowUnemplEmployer,
+            R.id.rowPension,   R.id.rowUnemplEmployee,
+            R.id.rowIncomeTax, R.id.rowNet
+        };
+
+        for (int i = 0; i < 6; i++) {
+            View row      = findViewById(rowIds[i]);
+            rowViews[i]   = row;
+            row.findViewById(R.id.rowDot).setBackgroundColor(rowDotColors[i]);
+            rowAmounts[i] = row.findViewById(R.id.rowAmount);
+            rowPcts[i]    = row.findViewById(R.id.rowPct);
+            rowBars[i]    = row.findViewById(R.id.rowBar);
+        }
+        // Net row: larger green text
+        rowAmounts[5].setTextColor(Color.parseColor("#00FF87"));
+        rowAmounts[5].setTextSize(16);
     }
 
     private void initTranslations() {
-        // Русский
         translations.put("ru", new HashMap<>() {{
-            put("input_hint", "Введите брутто-зарплату (€)");
-            put("calculate", "Рассчитать");
-            put("total_employer_cost", "Сумма затрат работодателя");
-            put("social_tax_employer", "Социальный налог (работодатель, 33%)");
-            put("unemployment_employer", "Страхование от безработицы (работодатель, 0.8%)");
-            put("gross", "Брутто-зарплата");
-            put("pension", "Накопительная пенсия (II ступень, 2%)");
-            put("unemployment_employee", "Страхование от безработицы (работник, 1.6%)");
-            put("income_tax", "Подоходный налог (22%)");
-            put("net", "Нетто-зарплата");
-            put("footer", "© 2026 PalkApp. Все права защищены.\nВопросы или предложения: palkapp.info@gmail.com");
-            put("error", "Ошибка: введите число");
-            put("result_title", "Результаты расчета");
+            put("input_hint",          "Введите брутто-зарплату (€)");
+            put("input_label",         "БРУТТО-ЗАРПЛАТА");
+            put("input_unit",          "/ мес");
+            put("calculate",           "⚡ Рассчитать");
+            put("result_label",        "РЕЗУЛЬТАТЫ");
+            put("employer_label",      "РАБОТОДАТЕЛЬ ВСЕГО");
+            put("legend_net",          "Нетто");
+            put("legend_social",       "Соцналог");
+            put("legend_tax",          "Налог");
+            put("legend_contrib",      "Взносы");
+            put("row_social",          "Социальный налог (33%)");
+            put("row_unempl_employer", "Страховка безработица (работодатель, 0.8%)");
+            put("row_pension",         "Накопит. пенсия II ступень (2%)");
+            put("row_unempl_employee", "Страховка безработица (работник, 1.6%)");
+            put("row_income_tax",      "Подоходный налог (22%)");
+            put("row_net",             "Нетто-зарплата");
+            put("footer",              "© 2026 PalkApp · palkapp.info@gmail.com");
+            put("error",               "Ошибка: введите число");
         }});
 
-        // Английский
         translations.put("en", new HashMap<>() {{
-            put("input_hint", "Enter gross salary (€)");
-            put("calculate", "Calculate");
-            put("total_employer_cost", "Total employer cost");
-            put("social_tax_employer", "Social tax (employer, 33%)");
-            put("unemployment_employer", "Unemployment insurance (employer, 0.8%)");
-            put("gross", "Gross salary");
-            put("pension", "Funded pension (2nd tier, 2%)");
-            put("unemployment_employee", "Unemployment insurance (employee, 1.6%)");
-            put("income_tax", "Income tax (22%)");
-            put("net", "Net salary");
-            put("footer", "© 2026 PalkApp. All rights reserved.\nQuestions or feedback: palkapp.info@gmail.com");
-            put("error", "Error: enter a number");
-            put("result_title", "Calculation results");
+            put("input_hint",          "Enter gross salary (€)");
+            put("input_label",         "GROSS SALARY");
+            put("input_unit",          "/ month");
+            put("calculate",           "⚡ Calculate");
+            put("result_label",        "RESULTS");
+            put("employer_label",      "TOTAL EMPLOYER COST");
+            put("legend_net",          "Net salary");
+            put("legend_social",       "Social tax");
+            put("legend_tax",          "Income tax");
+            put("legend_contrib",      "Your contributions");
+            put("row_social",          "Social tax (employer, 33%)");
+            put("row_unempl_employer", "Unemployment insurance (employer, 0.8%)");
+            put("row_pension",         "Funded pension 2nd tier (2%)");
+            put("row_unempl_employee", "Unemployment insurance (employee, 1.6%)");
+            put("row_income_tax",      "Income tax (22%)");
+            put("row_net",             "Net salary");
+            put("footer",              "© 2026 PalkApp · palkapp.info@gmail.com");
+            put("error",               "Error: enter a number");
         }});
 
-        // Эстонский
         translations.put("et", new HashMap<>() {{
-            put("input_hint", "Sisesta brutopalk (€)");
-            put("calculate", "Arvuta");
-            put("total_employer_cost", "Tööandja kulud kokku");
-            put("social_tax_employer", "Sotsiaalmaks (tööandja, 33%)");
-            put("unemployment_employer", "Töötuskindlustus (tööandja, 0.8%)");
-            put("gross", "Brutopalk");
-            put("pension", "Kogumispension (II sammas, 2%)");
-            put("unemployment_employee", "Töötuskindlustus (töötaja, 1.6%)");
-            put("income_tax", "Tulumaks (22%)");
-            put("net", "Netopalk");
-            put("footer", "© 2026 PalkApp. Kõik õigused kaitstud.\nKüsimused või tagasiside: palkapp.info@gmail.com");
-            put("error", "Viga: sisesta number");
-            put("result_title", "Arvutuse tulemused");
+            put("input_hint",          "Sisesta brutopalk (€)");
+            put("input_label",         "BRUTOPALK");
+            put("input_unit",          "/ kuus");
+            put("calculate",           "⚡ Arvuta");
+            put("result_label",        "TULEMUSED");
+            put("employer_label",      "TÖÖANDJA KOKKU");
+            put("legend_net",          "Netopalk");
+            put("legend_social",       "Sotsiaalmaks");
+            put("legend_tax",          "Tulumaks");
+            put("legend_contrib",      "Teie maksed");
+            put("row_social",          "Sotsiaalmaks (tööandja, 33%)");
+            put("row_unempl_employer", "Töötuskindlustus (tööandja, 0.8%)");
+            put("row_pension",         "Kogumispension II sammas (2%)");
+            put("row_unempl_employee", "Töötuskindlustus (töötaja, 1.6%)");
+            put("row_income_tax",      "Tulumaks (22%)");
+            put("row_net",             "Netopalk");
+            put("footer",              "© 2026 PalkApp · palkapp.info@gmail.com");
+            put("error",               "Viga: sisesta number");
         }});
     }
 
@@ -100,53 +165,90 @@ public class MainActivity extends AppCompatActivity {
         HashMap<String, String> t = translations.get(lang);
 
         salaryInput.setHint(t.get("input_hint"));
+        tvInputLabel.setText(t.get("input_label"));
+        tvInputUnit.setText(t.get("input_unit"));
         calcButton.setText(t.get("calculate"));
-        resultText.setText("");
+        tvResultLabel.setText(t.get("result_label"));
+        tvEmployerLabel.setText(t.get("employer_label"));
+        tvLegendNetLabel.setText(t.get("legend_net"));
+        tvLegendSocialLabel.setText(t.get("legend_social"));
+        tvLegendTaxLabel.setText(t.get("legend_tax"));
+        tvLegendContribLabel.setText(t.get("legend_contrib"));
         footerText.setText(t.get("footer"));
+
+        String[] rowKeys = {
+            "row_social", "row_unempl_employer", "row_pension",
+            "row_unempl_employee", "row_income_tax", "row_net"
+        };
+        for (int i = 0; i < 6; i++) {
+            ((TextView) rowViews[i].findViewById(R.id.rowName)).setText(t.get(rowKeys[i]));
+        }
+
+        updatePillStyle(langRu, lang.equals("ru"));
+        updatePillStyle(langEn, lang.equals("en"));
+        updatePillStyle(langEt, lang.equals("et"));
     }
 
-    private void calculateSalary() {
-        HashMap<String, String> t = translations.get(currentLang);
-
-        try {
-            double gross = Double.parseDouble(salaryInput.getText().toString());
-
-            // Взносы работника (вычитаются до расчёта подоходного налога)
-            double pension = gross * 0.02;           // 2%
-            double unemploymentEmployee = gross * 0.016; // 1.6%
-
-            // Необлагаемый минимум 2026: €700/мес фиксированно
-            double taxFreeMinimum = 700.0;
-
-            // Налогооблагаемая база = брутто − пенсия − безработица − вычет
-            double taxableIncome = Math.max(0, gross - pension - unemploymentEmployee - taxFreeMinimum);
-            double incomeTax = taxableIncome * 0.22; // 22%
-
-            // Нетто = брутто − пенсия − безработица − подоходный
-            double netSalary = gross - pension - unemploymentEmployee - incomeTax;
-
-            // Взносы работодателя
-            double socialTaxEmployer = gross * 0.33;       // 33%
-            double unemploymentEmployer = gross * 0.008;   // 0.8%
-            double totalEmployerCost = gross + socialTaxEmployer + unemploymentEmployer;
-
-            // Процент от затрат работодателя
-            double pct = totalEmployerCost / 100.0;
-
-            String result = t.get("result_title") + "\n\n" +
-                    t.get("total_employer_cost") + ": " + String.format("%.2f", totalEmployerCost) + " EUR\n" +
-                    t.get("social_tax_employer") + ": " + String.format("%.2f", socialTaxEmployer) + " EUR  (" + String.format("%.2f", socialTaxEmployer / pct) + "%)\n" +
-                    t.get("unemployment_employer") + ": " + String.format("%.2f", unemploymentEmployer) + " EUR  (" + String.format("%.2f", unemploymentEmployer / pct) + "%)\n" +
-                    t.get("gross") + ": " + String.format("%.2f", gross) + " EUR\n" +
-                    t.get("pension") + ": " + String.format("%.2f", pension) + " EUR  (" + String.format("%.2f", pension / pct) + "%)\n" +
-                    t.get("unemployment_employee") + ": " + String.format("%.2f", unemploymentEmployee) + " EUR  (" + String.format("%.2f", unemploymentEmployee / pct) + "%)\n" +
-                    t.get("income_tax") + ": " + String.format("%.2f", incomeTax) + " EUR  (" + String.format("%.2f", incomeTax / pct) + "%)\n" +
-                    t.get("net") + ": " + String.format("%.2f", netSalary) + " EUR  (" + String.format("%.2f", netSalary / pct) + "%)";
-
-            resultText.setText(result);
-
-        } catch (NumberFormatException e) {
-            resultText.setText(t.get("error"));
+    private void updatePillStyle(TextView pill, boolean active) {
+        if (active) {
+            pill.setBackgroundResource(R.drawable.bg_lang_pill_active);
+            pill.setTextColor(Color.parseColor("#00FF87"));
+        } else {
+            pill.setBackgroundResource(R.drawable.bg_lang_pill_inactive);
+            pill.setTextColor(Color.parseColor("#66FFFFFF"));
         }
+    }
+
+    private void calculateAndDisplay() {
+        HashMap<String, String> t = translations.get(currentLang);
+        String input = salaryInput.getText().toString().trim();
+        try {
+            double gross = Double.parseDouble(input);
+            SalaryCalculator c = new SalaryCalculator(gross);
+            displayResults(c, t);
+        } catch (NumberFormatException e) {
+            salaryInput.setError(t.get("error"));
+        }
+    }
+
+    void displayResults(SalaryCalculator c, HashMap<String, String> t) {
+        double pct = c.totalEmployerCost / 100.0;
+
+        tvNet.setText(String.format("%.2f €", c.netSalary));
+        tvTotalEmployer.setText(String.format("%.2f €", c.totalEmployerCost));
+
+        tvLegendNet.setText(String.format("%.2f", c.netSalary));
+        tvLegendSocial.setText(String.format("%.2f", c.socialTaxEmployer));
+        tvLegendTax.setText(String.format("%.2f", c.incomeTax));
+        tvLegendContrib.setText(String.format("%.2f", c.pension + c.unemploymentEmployee));
+
+        double[] amounts = {
+            c.socialTaxEmployer,
+            c.unemploymentEmployer,
+            c.pension,
+            c.unemploymentEmployee,
+            c.incomeTax,
+            c.netSalary
+        };
+        for (int i = 0; i < 6; i++) {
+            rowAmounts[i].setText(String.format("%.2f €", amounts[i]));
+            rowPcts[i].setText(String.format("%.2f%%", amounts[i] / pct));
+            int maxBarPx = (int)(80 * getResources().getDisplayMetrics().density);
+            android.view.ViewGroup.LayoutParams lp = rowBars[i].getLayoutParams();
+            lp.width = (int)(maxBarPx * amounts[i] / c.totalEmployerCost);
+            rowBars[i].setBackgroundColor(rowDotColors[i]);
+            rowBars[i].setLayoutParams(lp);
+        }
+
+        updatePieChart(c);
+        animateResultsEntrance();
+    }
+
+    // Placeholder — implemented in Task 6
+    protected void updatePieChart(SalaryCalculator c) { }
+
+    // Placeholder — implemented in Task 7
+    protected void animateResultsEntrance() {
+        cardResults.setVisibility(View.VISIBLE);
     }
 }
