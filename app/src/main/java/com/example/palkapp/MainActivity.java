@@ -1,8 +1,10 @@
 package com.example.palkapp;
 
+import android.animation.ValueAnimator;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.view.View;
+import android.view.animation.DecelerateInterpolator;
 import android.widget.LinearLayout;
 import android.widget.TextView;
 import android.widget.EditText;
@@ -223,6 +225,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void calculateAndDisplay() {
+        calcButton.animate().scaleX(0.96f).scaleY(0.96f).setDuration(80)
+            .withEndAction(() ->
+                calcButton.animate().scaleX(1f).scaleY(1f).setDuration(80).start()
+            ).start();
         HashMap<String, String> t = translations.get(currentLang);
         String input = salaryInput.getText().toString().trim();
         try {
@@ -294,8 +300,45 @@ public class MainActivity extends AppCompatActivity {
         pieChart.invalidate();
     }
 
-    // Placeholder — implemented in Task 7
     protected void animateResultsEntrance() {
+        // Card fade + slide up
+        cardResults.setAlpha(0f);
+        cardResults.setTranslationY(40f);
         cardResults.setVisibility(View.VISIBLE);
+        cardResults.animate()
+            .alpha(1f)
+            .translationY(0f)
+            .setDuration(350)
+            .setInterpolator(new DecelerateInterpolator())
+            .start();
+
+        // Staggered row fade-in (60ms delay per row)
+        for (int i = 0; i < rowViews.length; i++) {
+            final View row = rowViews[i];
+            row.setAlpha(0f);
+            row.animate()
+                .alpha(1f)
+                .setStartDelay(300 + i * 60L)
+                .setDuration(250)
+                .start();
+        }
+
+        // Bar width animation from 0 to target
+        for (int i = 0; i < rowBars.length; i++) {
+            final View bar = rowBars[i];
+            final int targetWidth = bar.getLayoutParams().width;
+            bar.getLayoutParams().width = 0;
+            bar.requestLayout();
+            ValueAnimator anim = ValueAnimator.ofInt(0, targetWidth);
+            anim.setStartDelay(400 + i * 60L);
+            anim.setDuration(500);
+            anim.setInterpolator(new DecelerateInterpolator());
+            anim.addUpdateListener(animation -> {
+                android.view.ViewGroup.LayoutParams lp = bar.getLayoutParams();
+                lp.width = (int) animation.getAnimatedValue();
+                bar.setLayoutParams(lp);
+            });
+            anim.start();
+        }
     }
 }
