@@ -117,6 +117,7 @@ public class MainActivity extends AppCompatActivity {
         pieChart.setRotationEnabled(false);
         pieChart.setHighlightPerTapEnabled(false);
         pieChart.getLegend().setEnabled(false);
+        pieChart.setDrawEntryLabels(false);
         pieChart.setTouchEnabled(false);
     }
 
@@ -189,7 +190,9 @@ public class MainActivity extends AppCompatActivity {
         currentLang = lang;
         HashMap<String, String> t = translations.get(lang);
 
-        salaryInput.setHint(t.get("input_hint"));
+        android.text.SpannableString hint = new android.text.SpannableString(t.get("input_hint"));
+        hint.setSpan(new android.text.style.RelativeSizeSpan(0.43f), 0, hint.length(), 0);
+        salaryInput.setHint(hint);
         tvInputLabel.setText(t.get("input_label"));
         tvInputUnit.setText(t.get("input_unit"));
         calcButton.setText(t.get("calculate"));
