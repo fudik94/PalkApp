@@ -5,14 +5,17 @@
     android:viewportWidth="108"
     android:viewportHeight="108">
 
-    <!-- Green circle (two semicircles, fits within 72dp safe zone: 18..90) -->
+    <!-- Green circle (two semicircles, safe zone 18..90) -->
     <path
         android:fillColor="#00FF87"
         android:pathData="M18,54 A36,36 0 1,0 90,54 A36,36 0 1,0 18,54 Z" />
 
-    <!-- Letter P: stem x=40-52 y=27-81, bump radius=15 from y=27 to y=57 curving right -->
+    <!-- Letter P: bold, centered at (54,54)
+         Stem: x=40-54 (14dp wide), y=27-81
+         Bump: radius=16, from y=27 to y=59, extends right to x=70
+         sweep=0 gives bump curving to the RIGHT -->
     <path
         android:fillColor="#071A12"
-        android:pathData="M40,27 L40,81 L52,81 L52,57 A15,15 0 0,1 52,27 Z" />
+        android:pathData="M40,27 L40,81 L54,81 L54,59 A16,16 0 0,0 54,27 Z" />
 
 </vector>
