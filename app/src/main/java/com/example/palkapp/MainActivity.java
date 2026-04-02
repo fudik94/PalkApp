@@ -47,45 +47,51 @@ public class MainActivity extends AppCompatActivity {
         translations.put("ru", new HashMap<>() {{
             put("input_hint", "Введите брутто-зарплату (€)");
             put("calculate", "Рассчитать");
-            put("net", "Чистыми");
-            put("gross", "Брутто");
-            put("your_contributions", "Ваши взносы");
-            put("employer_contributions", "Взносы работодателя");
-            put("income_tax", "Подоходный налог");
-            put("net_income", "Чистый доход");
-            put("footer", "© 2025 PalkApp. Все права защищены.\nВопросы или предложения: palkapp.info@gmail.com");
+            put("total_employer_cost", "Сумма затрат работодателя");
+            put("social_tax_employer", "Социальный налог (работодатель, 33%)");
+            put("unemployment_employer", "Страхование от безработицы (работодатель, 0.8%)");
+            put("gross", "Брутто-зарплата");
+            put("pension", "Накопительная пенсия (II ступень, 2%)");
+            put("unemployment_employee", "Страхование от безработицы (работник, 1.6%)");
+            put("income_tax", "Подоходный налог (22%)");
+            put("net", "Нетто-зарплата");
+            put("footer", "© 2026 PalkApp. Все права защищены.\nВопросы или предложения: palkapp.info@gmail.com");
             put("error", "Ошибка: введите число");
-            put("result_title", "Результаты расчета чистой зарплаты");
+            put("result_title", "Результаты расчета");
         }});
 
         // Английский
         translations.put("en", new HashMap<>() {{
             put("input_hint", "Enter gross salary (€)");
             put("calculate", "Calculate");
-            put("net", "Net salary");
+            put("total_employer_cost", "Total employer cost");
+            put("social_tax_employer", "Social tax (employer, 33%)");
+            put("unemployment_employer", "Unemployment insurance (employer, 0.8%)");
             put("gross", "Gross salary");
-            put("your_contributions", "Your contributions");
-            put("employer_contributions", "Contributions paid by the employer");
-            put("income_tax", "Your income tax");
-            put("net_income", "Net income");
-            put("footer", "© 2025 PalkApp. All rights reserved.\nQuestions or feedback: palkapp.info@gmail.com");
+            put("pension", "Funded pension (2nd tier, 2%)");
+            put("unemployment_employee", "Unemployment insurance (employee, 1.6%)");
+            put("income_tax", "Income tax (22%)");
+            put("net", "Net salary");
+            put("footer", "© 2026 PalkApp. All rights reserved.\nQuestions or feedback: palkapp.info@gmail.com");
             put("error", "Error: enter a number");
-            put("result_title", "Results of net salary calculation");
+            put("result_title", "Calculation results");
         }});
 
         // Эстонский
         translations.put("et", new HashMap<>() {{
             put("input_hint", "Sisesta brutopalk (€)");
             put("calculate", "Arvuta");
-            put("net", "Netopalk");
+            put("total_employer_cost", "Tööandja kulud kokku");
+            put("social_tax_employer", "Sotsiaalmaks (tööandja, 33%)");
+            put("unemployment_employer", "Töötuskindlustus (tööandja, 0.8%)");
             put("gross", "Brutopalk");
-            put("your_contributions", "Teie maksed");
-            put("employer_contributions", "Tööandja maksed");
-            put("income_tax", "Tulumaks");
-            put("net_income", "Netosissetulek");
-            put("footer", "© 2025 PalkApp. Kõik õigused kaitstud.\nKüsimused või tagasiside: palkapp.info@gmail.com");
+            put("pension", "Kogumispension (II sammas, 2%)");
+            put("unemployment_employee", "Töötuskindlustus (töötaja, 1.6%)");
+            put("income_tax", "Tulumaks (22%)");
+            put("net", "Netopalk");
+            put("footer", "© 2026 PalkApp. Kõik õigused kaitstud.\nKüsimused või tagasiside: palkapp.info@gmail.com");
             put("error", "Viga: sisesta number");
-            put("result_title", "Netopalga arvutuse tulemused");
+            put("result_title", "Arvutuse tulemused");
         }});
     }
 
@@ -105,30 +111,37 @@ public class MainActivity extends AppCompatActivity {
         try {
             double gross = Double.parseDouble(salaryInput.getText().toString());
 
-            // Ваши взносы
-            double pensionContribution = gross * 0.02;
-            double unemploymentInsurance = gross * 0.016;
-            double yourContributions = pensionContribution + unemploymentInsurance;
+            // Взносы работника (вычитаются до расчёта подоходного налога)
+            double pension = gross * 0.02;           // 2%
+            double unemploymentEmployee = gross * 0.016; // 1.6%
 
-            // Налог на доход
-            double taxFreeIncome = gross <= 1200 ? 654 : 654 - (gross - 1200) * 654.0 / 900;
-            double taxableIncome = Math.max(0, gross - taxFreeIncome);
-            double incomeTax = taxableIncome * 0.20;
+            // Необлагаемый минимум 2026: €700/мес фиксированно
+            double taxFreeMinimum = 700.0;
+
+            // Налогооблагаемая база = брутто − пенсия − безработица − вычет
+            double taxableIncome = Math.max(0, gross - pension - unemploymentEmployee - taxFreeMinimum);
+            double incomeTax = taxableIncome * 0.22; // 22%
+
+            // Нетто = брутто − пенсия − безработица − подоходный
+            double netSalary = gross - pension - unemploymentEmployee - incomeTax;
 
             // Взносы работодателя
-            double employerContributions = gross * 0.33;
+            double socialTaxEmployer = gross * 0.33;       // 33%
+            double unemploymentEmployer = gross * 0.008;   // 0.8%
+            double totalEmployerCost = gross + socialTaxEmployer + unemploymentEmployer;
 
-            // Чистая зарплата
-            double netSalary = gross - incomeTax - yourContributions;
+            // Процент от затрат работодателя
+            double pct = totalEmployerCost / 100.0;
 
-            // Формируем текст результата на выбранном языке
             String result = t.get("result_title") + "\n\n" +
-                    t.get("net") + ": " + String.format("%,.2f", netSalary) + " EUR\n" +
-                    t.get("gross") + ": " + String.format("%,.2f", gross) + " EUR\n" +
-                    t.get("your_contributions") + ": " + String.format("%,.2f", yourContributions) + " EUR\n" +
-                    t.get("employer_contributions") + ": " + String.format("%,.2f", employerContributions) + " EUR\n" +
-                    t.get("income_tax") + ": " + String.format("%,.2f", incomeTax) + " EUR\n" +
-                    t.get("net_income") + ": " + String.format("%,.2f", netSalary) + " EUR";
+                    t.get("total_employer_cost") + ": " + String.format("%.2f", totalEmployerCost) + " EUR\n" +
+                    t.get("social_tax_employer") + ": " + String.format("%.2f", socialTaxEmployer) + " EUR  (" + String.format("%.2f", socialTaxEmployer / pct) + "%)\n" +
+                    t.get("unemployment_employer") + ": " + String.format("%.2f", unemploymentEmployer) + " EUR  (" + String.format("%.2f", unemploymentEmployer / pct) + "%)\n" +
+                    t.get("gross") + ": " + String.format("%.2f", gross) + " EUR\n" +
+                    t.get("pension") + ": " + String.format("%.2f", pension) + " EUR  (" + String.format("%.2f", pension / pct) + "%)\n" +
+                    t.get("unemployment_employee") + ": " + String.format("%.2f", unemploymentEmployee) + " EUR  (" + String.format("%.2f", unemploymentEmployee / pct) + "%)\n" +
+                    t.get("income_tax") + ": " + String.format("%.2f", incomeTax) + " EUR  (" + String.format("%.2f", incomeTax / pct) + "%)\n" +
+                    t.get("net") + ": " + String.format("%.2f", netSalary) + " EUR  (" + String.format("%.2f", netSalary / pct) + "%)";
 
             resultText.setText(result);
 
