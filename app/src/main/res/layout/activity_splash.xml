@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:gravity="center"
+    android:background="@drawable/bg_app">
+
+    <!-- Icon: green rounded square with P -->
+    <LinearLayout
+        android:layout_width="72dp"
+        android:layout_height="72dp"
+        android:background="@drawable/bg_button_green"
+        android:gravity="center">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="P"
+            android:textSize="36sp"
+            android:textStyle="bold"
+            android:textColor="#071A12" />
+    </LinearLayout>
+
+    <!-- PalkApp name -->
+    <LinearLayout
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="20dp">
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="Palk"
+            android:textSize="32sp"
+            android:textStyle="bold"
+            android:textColor="#FFFFFF" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="App"
+            android:textSize="32sp"
+            android:textStyle="bold"
+            android:textColor="#00FF87" />
+    </LinearLayout>
+
+</LinearLayout>

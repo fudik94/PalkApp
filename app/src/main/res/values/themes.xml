@@ -8,4 +8,8 @@
         <item name="android:navigationBarColor">@color/bg_primary</item>
     </style>
     <style name="Theme.PalkApp" parent="Base.Theme.PalkApp" />
+
+    <style name="Theme.PalkApp.Splash" parent="Base.Theme.PalkApp">
+        <item name="android:windowFullscreen">true</item>
+    </style>
 </resources>
