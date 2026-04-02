@@ -8,6 +8,13 @@ import android.widget.TextView;
 import android.widget.EditText;
 import androidx.appcompat.app.AppCompatActivity;
 import java.util.HashMap;
+import com.github.mikephil.charting.charts.PieChart;
+import com.github.mikephil.charting.data.PieData;
+import com.github.mikephil.charting.data.PieDataSet;
+import com.github.mikephil.charting.data.PieEntry;
+import com.github.mikephil.charting.animation.Easing;
+import java.util.ArrayList;
+import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -19,6 +26,7 @@ public class MainActivity extends AppCompatActivity {
     private TextView tvLegendNet, tvLegendSocial, tvLegendTax, tvLegendContrib;
     private TextView tvLegendNetLabel, tvLegendSocialLabel, tvLegendTaxLabel, tvLegendContribLabel;
     private LinearLayout cardResults;
+    private PieChart pieChart;
 
     private View[] rowViews = new View[6];
     private int[] rowDotColors;
@@ -93,6 +101,21 @@ public class MainActivity extends AppCompatActivity {
         // Net row: larger green text
         rowAmounts[5].setTextColor(Color.parseColor("#00FF87"));
         rowAmounts[5].setTextSize(16);
+
+        pieChart = findViewById(R.id.pieChart);
+        pieChart.getDescription().setEnabled(false);
+        pieChart.setDrawHoleEnabled(true);
+        pieChart.setHoleColor(Color.TRANSPARENT);
+        pieChart.setTransparentCircleColor(Color.TRANSPARENT);
+        pieChart.setHoleRadius(62f);
+        pieChart.setTransparentCircleRadius(65f);
+        pieChart.setDrawCenterText(true);
+        pieChart.setCenterTextColor(Color.parseColor("#00FF87"));
+        pieChart.setCenterTextSize(13f);
+        pieChart.setRotationEnabled(false);
+        pieChart.setHighlightPerTapEnabled(false);
+        pieChart.getLegend().setEnabled(false);
+        pieChart.setTouchEnabled(false);
     }
 
     private void initTranslations() {
@@ -244,8 +267,32 @@ public class MainActivity extends AppCompatActivity {
         animateResultsEntrance();
     }
 
-    // Placeholder — implemented in Task 6
-    protected void updatePieChart(SalaryCalculator c) { }
+    protected void updatePieChart(SalaryCalculator c) {
+        double employeeContribs = c.pension + c.unemploymentEmployee;
+        List<PieEntry> entries = new ArrayList<>();
+        entries.add(new PieEntry((float) c.netSalary,         "net"));
+        entries.add(new PieEntry((float) c.socialTaxEmployer, "social"));
+        entries.add(new PieEntry((float) c.incomeTax,         "tax"));
+        entries.add(new PieEntry((float) employeeContribs,    "contrib"));
+
+        PieDataSet dataSet = new PieDataSet(entries, "");
+        dataSet.setColors(
+            Color.parseColor("#00FF87"),
+            Color.parseColor("#6366F1"),
+            Color.parseColor("#EF4444"),
+            Color.parseColor("#F59E0B")
+        );
+        dataSet.setDrawValues(false);
+        dataSet.setSliceSpace(2f);
+
+        pieChart.setData(new PieData(dataSet));
+
+        double netPct = c.netSalary / c.totalEmployerCost * 100.0;
+        pieChart.setCenterText(String.format("%.1f%%\nneto", netPct));
+
+        pieChart.animateY(800, Easing.EaseInOutCubic);
+        pieChart.invalidate();
+    }
 
     // Placeholder — implemented in Task 7
     protected void animateResultsEntrance() {
