@@ -1,10 +1,10 @@
-# PalkApp — Estonian Salary Calculator
+# 🧮 PalkApp - Estonian Salary Calculator
 
 Android application for calculating net salary in Estonia. Enter your gross salary and instantly see the full tax breakdown with an animated chart.
 
 ---
 
-## Features
+## 🌍 Features
 
 - **3 languages** — Russian, English, Estonian
 - **Estonia 2026 tax rules** — income tax 22%, pension 2%, unemployment insurance 1.6%
@@ -15,7 +15,13 @@ Android application for calculating net salary in Estonia. Enter your gross sala
 
 ---
 
-## Tax Calculation (Estonia 2026)
+## 📊 Screenshots
+
+<img width="513" height="1088" alt="image" src="https://github.com/user-attachments/assets/b4f05873-ca67-452a-aab7-a3910039a3ce" />
+
+---
+
+## 💰 Tax Calculation (Estonia 2026)
 
 | Component | Rate |
 |---|---|
@@ -41,14 +47,6 @@ Total employer cost = Gross + Social tax + Unemployment(employer)
 - **Platform:** Android (min SDK 24 / Android 7.0)
 - **Chart:** MPAndroidChart 3.1.0
 - **Build:** Gradle + AGP
-
----
-
-## Build
-
-```bash
-./gradlew assembleDebug
-```
 
 ---
 
